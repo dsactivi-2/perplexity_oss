@@ -7,11 +7,18 @@ from search.providers.base import SearchProvider
 
 
 class SearxngSearchProvider(SearchProvider):
+    # Headers to bypass SearXNG bot detection for internal API calls
+    HEADERS = {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "Accept-Language": "en-US,en;q=0.9",
+    }
+
     def __init__(self, host: str):
         self.host = host
 
     async def search(self, query: str, time_range: str = None, num_results: int = 10) -> SearchResponse:
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=10.0, headers=self.HEADERS) as client:
             try:
                 link_results = await self.get_link_results(client, query, num_results=num_results, time_range=time_range)
                 # Skip image results to avoid timeout issues
